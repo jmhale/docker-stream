@@ -1,0 +1,161 @@
+version: '3.5'
+networks:
+  frontend:
+    external: true
+services:
+    phantombot:
+      container_name: phantombot
+      networks:
+        - frontend
+      image: gmt2001/phantombot-stable:latest
+      restart: always
+      volumes:
+        - ${PHANTOMBOT_HOME}/phantombot/addons:/opt/PhantomBot/addons
+        - ${PHANTOMBOT_HOME}/phantombot/config:/opt/PhantomBot/config
+        - ${PHANTOMBOT_HOME}/phantombot/dbbackup:/opt/PhantomBot/dbbackup
+        - ${PHANTOMBOT_HOME}/phantombot/logs:/opt/PhantomBot/logs
+        - ${PHANTOMBOT_HOME}/phantombot/scripts/custom:/opt/PhantomBot/scripts/custom
+        - ${PHANTOMBOT_HOME}/phantombot/discord/custom:/opt/PhantomBot/scripts/discord/custom
+        - ${PHANTOMBOT_HOME}/phantombot/lang/custom:/opt/PhantomBot/scripts/lang/custom
+      environment:
+        - PHANTOMBOT_USER=${PHANTOMBOT_USER}
+        - PHANTOMBOT_OWNER=${PHANTOMBOT_OWNER}
+        - PHANTOMBOT_CHANNEL=${PHANTOMBOT_CHANNEL}
+        - PHANTOMBOT_PANELUSER=${PHANTOMBOT_PANELUSER}
+        - PHANTOMBOT_PANELPASSWORD=${PHANTOMBOT_PANELPASSWORD}
+        - PHANTOMBOT_OAUTH=${PHANTOMBOT_OAUTH}
+        - PHANTOMBOT_APIOAUTH=${PHANTOMBOT_APIOAUTH}
+        - PHANTOMBOT_YTAUTH=${PHANTOMBOT_YTAUTH}
+        - PHANTOMBOT_YTAUTHRO=${PHANTOMBOT_YTAUTHRO}
+        - PHANTOMBOT_WEBAUTH=${PHANTOMBOT_WEBAUTH}
+        - PHANTOMBOT_WEBAUTHRO=${PHANTOMBOT_WEBAUTHRO}
+        - PHANTOMBOT_DISCORD_TOKEN=${PHANTOMBOT_DISCORD_TOKEN}
+        - PHANTOMBOT_TWITCHALERTSKEY=${PHANTOMBOT_TWITCHALERTSKEY}
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.middlewares.phantombot-redirect-redirectscheme.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.phantombot-redirect-redirectscheme.redirectscheme.permanent=true"
+        - "traefik.http.routers.phantombot-http.rule=Host(`phantom.${COMMON_DOMAIN}`)"
+        - "traefik.http.routers.phantombot-http.middlewares=phantombot-redirect-redirectscheme"
+        - "traefik.http.routers.phantombot-http.entrypoints=http"
+        - "traefik.http.routers.phantombot-https.rule=Host(`phantom.${COMMON_DOMAIN}`)"
+        - "traefik.http.routers.phantombot-https.entrypoints=https"
+        - "traefik.http.routers.phantombot-https.service=phantombot-https"
+        - "traefik.http.routers.phantombot-https.tls.certresolver=cloudflare"
+        - "traefik.http.services.phantombot-https.loadbalancer.server.port=25000"
+        - "traefik.http.middlewares.authHeader.headers.customrequestheaders.Authorization=Basic ${PBCUSTOM_AUTH_HEADER}"
+        - "traefik.http.middlewares.oauth.forwardauth.address=http://oauth:4181"
+        - "traefik.http.middlewares.oauth.forwardauth.trustForwardHeader=true"
+        - "traefik.http.middlewares.oauth.forwardauth.authResponseHeaders=X-Forwarded-User"
+        - "traefik.http.routers.phantombot-https.middlewares=oauth,authHeader"
+    polr:
+      image: ajanvier/polr
+      container_name: polr
+      networks:
+        - frontend
+      environment:
+          - DB_HOST=mariadb
+          - DB_DATABASE=${POLR_DB_DATABASE}
+          - DB_USERNAME=${POLR_DB_USERNAME}
+          - DB_PASSWORD=${POLR_DB_PASSWORD}
+          - ADMIN_USERNAME=${POLR_ADMIN_USERNAME}
+          - ADMIN_PASSWORD=${POLR_ADMIN_PASSWORD}
+          - ADMIN_EMAIL=${COMMON_ADMIN_EMAIL}
+          - APP_ADDRESS=${COMMON_DOMAIN}
+          - APP_NAME=${POLR_APP_NAME}
+          - APP_PROTOCOL=${POLR_APP_PROTOCOL}
+          - SETTING_PUBLIC_INTERFACE=false
+          - SETTING_SHORTEN_PERMISSION=true
+          - SETTING_INDEX_REDIRECT=https://twitch.tv/halestormin
+          - SETTING_REDIRECT_404=true
+          - SETTING_PSEUDORANDOM_ENDING=true
+          - SETTING_ADV_ANALYTICS=true
+      depends_on:
+          - mariadb
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.middlewares.polr-redirect-redirectscheme.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.polr-redirect-redirectscheme.redirectscheme.permanent=true"
+        - "traefik.http.routers.polr-http.rule=Host(`${COMMON_DOMAIN}`)"
+        - "traefik.http.routers.polr-http.middlewares=polr-redirect-redirectscheme"
+        - "traefik.http.routers.polr-http.entrypoints=http"
+        - "traefik.http.routers.polr-https.rule=Host(`${COMMON_DOMAIN}`)"
+        - "traefik.http.routers.polr-https.entrypoints=https"
+        - "traefik.http.routers.polr-https.service=polr-https"
+        - "traefik.http.routers.polr-https.tls.certresolver=cloudflare"
+        - "traefik.http.services.polr-https.loadbalancer.server.port=80"
+    mariadb:
+        image: mariadb
+        container_name: mariadb
+        networks:
+          - frontend
+        restart: always
+        environment:
+          - MYSQL_ROOT_PASSWORD=${POLR_DB_ROOT_PASSWORD}
+          - MYSQL_DATABASE=${POLR_DB_DATABASE}
+          - MYSQL_USER=${POLR_DB_USERNAME}
+          - MYSQL_PASSWORD=${POLR_DB_PASSWORD}
+        volumes:
+          - /root/docker/mariadb:/var/lib/mysql
+    traefik:
+      hostname: traefik
+      container_name: traefik
+      image: traefik:latest
+      restart: always
+      domainname: ${COMMON_DOMAIN}
+      command:
+        - "--log.level=DEBUG"
+        - "--api.insecure=true"
+        - "--providers.docker=true"
+        - "--providers.docker.exposedbydefault=false"
+        - "--entrypoints.http.address=:80"
+        - "--entrypoints.https.address=:443"
+        - "--certificatesresolvers.cloudflare.acme.dnschallenge=true"
+        - "--certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare"
+        - "--certificatesresolvers.cloudflare.acme.email=${COMMON_ADMIN_EMAIL}"
+        - "--certificatesresolvers.cloudflare.acme.storage=/letsencrypt/acme.json"
+      environment:
+        - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+        - CF_ZONE_API_TOKEN=${CF_ZONE_API_TOKEN}
+      networks:
+        - frontend
+      ports:
+        - "80:80"
+        - "443:443"
+        - "8080:8080"
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        - /root/docker/traefik/letsencrypt:/letsencrypt
+      labels:
+          - "traefik.http.routers.api.tls.certresolver=cloudflare"
+          - "traefik.http.routers.api.tls.domains[0].main=${COMMON_DOMAIN}"
+          - "traefik.http.routers.api.tls.domains[0].sans=*.${COMMON_DOMAIN}"
+    oauth:
+      image: thomseddon/traefik-forward-auth
+      hostname: oauth
+      container_name: oauth
+      restart: always
+      networks:
+        - frontend
+      environment:
+        - PROVIDERS_GOOGLE_CLIENT_ID=${OAUTH_CLIENT_ID}
+        - PROVIDERS_GOOGLE_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}
+        - SECRET=${OAUTH_SECRET}
+        - COOKIE_DOMAIN=${COMMON_DOMAIN}
+        - INSECURE_COOKIE=false
+        - AUTH_HOST=oauth.${COMMON_DOMAIN}
+        - URL_PATH=/_oauth
+        - WHITELIST=${OAUTH_EMAIL_WHITELIST}
+        - LOG_LEVEL=info
+        - LIFETIME=2592000 # 30 days
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.oauth.rule=Host(`oauth.${COMMON_DOMAIN}`)"
+        - "traefik.http.routers.oauth.entrypoints=https"
+        - "traefik.http.routers.oauth.service=oauth"
+        - "traefik.http.routers.oauth.tls.certresolver=cloudflare"
+        - "traefik.http.services.oauth.loadbalancer.server.port=4181"
+        - "traefik.http.middlewares.oauth.forwardauth.address=http://oauth:4181"
+        - "traefik.http.middlewares.oauth.forwardauth.trustForwardHeader=true"
+        - "traefik.http.middlewares.oauth.forwardauth.authResponseHeaders=X-Forwarded-User"
+        - "traefik.http.routers.oauth.middlewares=oauth"
