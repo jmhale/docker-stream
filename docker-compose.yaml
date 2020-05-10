@@ -127,9 +127,24 @@ services:
         - /var/run/docker.sock:/var/run/docker.sock:ro
         - /root/docker/traefik/letsencrypt:/letsencrypt
       labels:
+          - "traefik.enable=true"
           - "traefik.http.routers.api.tls.certresolver=cloudflare"
           - "traefik.http.routers.api.tls.domains[0].main=${COMMON_DOMAIN}"
           - "traefik.http.routers.api.tls.domains[0].sans=*.${COMMON_DOMAIN}"
+          - "traefik.http.middlewares.traefik-redirect-redirectscheme.redirectscheme.scheme=https"
+          - "traefik.http.middlewares.traefik-redirect-redirectscheme.redirectscheme.permanent=true"
+          - "traefik.http.routers.traefik-http.rule=Host(`traefik.${COMMON_DOMAIN}`)"
+          - "traefik.http.routers.traefik-http.middlewares=traefik-redirect-redirectscheme"
+          - "traefik.http.routers.traefik-http.entrypoints=http"
+          - "traefik.http.routers.traefik-https.rule=Host(`traefik.${COMMON_DOMAIN}`)"
+          - "traefik.http.routers.traefik-https.entrypoints=https"
+          - "traefik.http.routers.traefik-https.service=traefik-https"
+          - "traefik.http.routers.traefik-https.tls.certresolver=cloudflare"
+          - "traefik.http.services.traefik-https.loadbalancer.server.port=8080"
+          - "traefik.http.middlewares.oauth.forwardauth.address=http://oauth:4181"
+          - "traefik.http.middlewares.oauth.forwardauth.trustForwardHeader=true"
+          - "traefik.http.middlewares.oauth.forwardauth.authResponseHeaders=X-Forwarded-User"
+          - "traefik.http.routers.traefik-https.middlewares=oauth"
     oauth:
       image: thomseddon/traefik-forward-auth
       hostname: oauth
