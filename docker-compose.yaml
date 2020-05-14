@@ -49,7 +49,7 @@ services:
         - "traefik.http.middlewares.oauth.forwardauth.authResponseHeaders=X-Forwarded-User"
         - "traefik.http.routers.phantombot-https.middlewares=oauth,authHeader"
     polr:
-      image: ajanvier/polr
+      image: 0xhale/polr
       container_name: polr
       networks:
         - frontend
@@ -70,6 +70,9 @@ services:
           - SETTING_REDIRECT_404=true
           - SETTING_PSEUDORANDOM_ENDING=true
           - SETTING_ADV_ANALYTICS=true
+          - OPENID_CONNECT_CLIENT_ID=${PROVIDERS_OIDC_CLIENT_ID}
+          - OPENID_CONNECT_CLIENT_SECRET=${PROVIDERS_OIDC_CLIENT_SECRET}
+          - OPENID_CONNECT_URL=${PROVIDERS_OIDC_ISSUER_URL}
       depends_on:
           - mariadb
       labels:
