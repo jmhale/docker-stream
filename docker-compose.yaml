@@ -104,6 +104,7 @@ services:
       restart: always
       domainname: ${COMMON_DOMAIN}
       command:
+        - "--accesslog=true"
         - "--log.level=DEBUG"
         - "--api.insecure=true"
         - "--providers.docker=true"
