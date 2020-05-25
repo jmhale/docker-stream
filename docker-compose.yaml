@@ -7,7 +7,7 @@ services:
       container_name: phantombot
       networks:
         - frontend
-      image: 0xhale/phantombot:latest
+      image: 0xhale/phantombot:stable
       restart: always
       volumes:
         - ${PHANTOMBOT_HOME}/phantombot/addons:/opt/PhantomBot/addons
