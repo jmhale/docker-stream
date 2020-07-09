@@ -46,7 +46,7 @@ services:
         - "traefik.http.routers.phantombot-https.rule=Host(`phantom.${COMMON_DOMAIN}`)"
         - "traefik.http.routers.phantombot-https.entrypoints=https"
         - "traefik.http.routers.phantombot-https.service=phantombot-https"
-        - "traefik.http.routers.phantombot-https.tls.certresolver=cloudflare"
+        - "traefik.http.routers.phantombot-https.tls=true"
         - "traefik.http.services.phantombot-https.loadbalancer.server.port=25000"
         - "traefik.http.middlewares.authHeader.headers.customrequestheaders.Authorization=Basic ${PBCUSTOM_AUTH_HEADER}"
         - "traefik.http.middlewares.oauth.forwardauth.address=http://oauth:4181"
@@ -87,7 +87,7 @@ services:
         - "traefik.http.routers.polr-https.rule=Host(`${COMMON_DOMAIN}`)"
         - "traefik.http.routers.polr-https.entrypoints=https"
         - "traefik.http.routers.polr-https.service=polr-https"
-        - "traefik.http.routers.polr-https.tls.certresolver=cloudflare"
+        - "traefik.http.routers.polr-https.tls=true"
         - "traefik.http.services.polr-https.loadbalancer.server.port=80"
     mariadb:
         image: mariadb
@@ -175,7 +175,7 @@ services:
         - "traefik.http.routers.oauth.rule=Host(`oauth.${COMMON_DOMAIN}`)"
         - "traefik.http.routers.oauth.entrypoints=https"
         - "traefik.http.routers.oauth.service=oauth"
-        - "traefik.http.routers.oauth.tls.certresolver=cloudflare"
+        - "traefik.http.routers.oauth.tls=true"
         - "traefik.http.services.oauth.loadbalancer.server.port=4181"
         - "traefik.http.middlewares.oauth.forwardauth.address=http://oauth:4181"
         - "traefik.http.middlewares.oauth.forwardauth.trustForwardHeader=true"
