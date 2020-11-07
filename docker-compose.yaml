@@ -2,56 +2,56 @@ version: '3.5'
 networks:
   frontend:
 services:
-    phantombot:
-      container_name: phantombot
-      networks:
-        - frontend
-      image: 0xhale/phantombot:stable
-      restart: always
-      volumes:
-        - ${PHANTOMBOT_HOME}/phantombot/addons:/opt/PhantomBot/addons
-        - ${PHANTOMBOT_HOME}/phantombot/config:/opt/PhantomBot/config
-        - ${PHANTOMBOT_HOME}/phantombot/dbbackup:/opt/PhantomBot/dbbackup
-        - ${PHANTOMBOT_HOME}/phantombot/logs:/opt/PhantomBot/logs
-        - ${PHANTOMBOT_HOME}/phantombot/scripts/custom:/opt/PhantomBot/scripts/custom
-        - ${PHANTOMBOT_HOME}/phantombot/discord/custom:/opt/PhantomBot/scripts/discord/custom
-        - ${PHANTOMBOT_HOME}/phantombot/lang/custom:/opt/PhantomBot/scripts/lang/custom
-      environment:
-        - PHANTOMBOT_USER=${PHANTOMBOT_USER}
-        - PHANTOMBOT_OWNER=${PHANTOMBOT_OWNER}
-        - PHANTOMBOT_CHANNEL=${PHANTOMBOT_CHANNEL}
-        - PHANTOMBOT_PANELUSER=${PHANTOMBOT_PANELUSER}
-        - PHANTOMBOT_PANELPASSWORD=${PHANTOMBOT_PANELPASSWORD}
-        - PHANTOMBOT_OAUTH=${PHANTOMBOT_OAUTH}
-        - PHANTOMBOT_APIOAUTH=${PHANTOMBOT_APIOAUTH}
-        - PHANTOMBOT_YTAUTH=${PHANTOMBOT_YTAUTH}
-        - PHANTOMBOT_YTAUTHRO=${PHANTOMBOT_YTAUTHRO}
-        - PHANTOMBOT_WEBAUTH=${PHANTOMBOT_WEBAUTH}
-        - PHANTOMBOT_WEBAUTHRO=${PHANTOMBOT_WEBAUTHRO}
-        - PHANTOMBOT_DISCORD_TOKEN=${PHANTOMBOT_DISCORD_TOKEN}
-        - PHANTOMBOT_TWITCHALERTSKEY=${PHANTOMBOT_TWITCHALERTSKEY}
-        - PHANTOMBOT_TWITTERUSER=${PHANTOMBOT_TWITTERUSER}
-        - PHANTOMBOT_TWITTER_CONSUMER_KEY=${PHANTOMBOT_TWITTER_CONSUMER_KEY}
-        - PHANTOMBOT_TWITTER_CONSUMER_SECRET=${PHANTOMBOT_TWITTER_CONSUMER_SECRET}
-        - PHANTOMBOT_TWITTER_ACCESS_TOKEN=${PHANTOMBOT_TWITTER_ACCESS_TOKEN}
-        - PHANTOMBOT_TWITTER_SECRET_TOKEN=${PHANTOMBOT_TWITTER_SECRET_TOKEN}
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.middlewares.phantombot-redirect-redirectscheme.redirectscheme.scheme=https"
-        - "traefik.http.middlewares.phantombot-redirect-redirectscheme.redirectscheme.permanent=true"
-        - "traefik.http.routers.phantombot-http.rule=Host(`phantom.${COMMON_DOMAIN}`)"
-        - "traefik.http.routers.phantombot-http.middlewares=phantombot-redirect-redirectscheme"
-        - "traefik.http.routers.phantombot-http.entrypoints=http"
-        - "traefik.http.routers.phantombot-https.rule=Host(`phantom.${COMMON_DOMAIN}`)"
-        - "traefik.http.routers.phantombot-https.entrypoints=https"
-        - "traefik.http.routers.phantombot-https.service=phantombot-https"
-        - "traefik.http.routers.phantombot-https.tls=true"
-        - "traefik.http.services.phantombot-https.loadbalancer.server.port=25000"
-        - "traefik.http.middlewares.authHeader.headers.customrequestheaders.Authorization=Basic ${PBCUSTOM_AUTH_HEADER}"
-        - "traefik.http.middlewares.oauth.forwardauth.address=http://oauth:4181"
-        - "traefik.http.middlewares.oauth.forwardauth.trustForwardHeader=true"
-        - "traefik.http.middlewares.oauth.forwardauth.authResponseHeaders=X-Forwarded-User"
-        - "traefik.http.routers.phantombot-https.middlewares=oauth,authHeader"
+    # phantombot:
+    #   container_name: phantombot
+    #   networks:
+    #     - frontend
+    #   image: 0xhale/phantombot:stable
+    #   restart: always
+    #   volumes:
+    #     - ${PHANTOMBOT_HOME}/phantombot/addons:/opt/PhantomBot/addons
+    #     - ${PHANTOMBOT_HOME}/phantombot/config:/opt/PhantomBot/config
+    #     - ${PHANTOMBOT_HOME}/phantombot/dbbackup:/opt/PhantomBot/dbbackup
+    #     - ${PHANTOMBOT_HOME}/phantombot/logs:/opt/PhantomBot/logs
+    #     - ${PHANTOMBOT_HOME}/phantombot/scripts/custom:/opt/PhantomBot/scripts/custom
+    #     - ${PHANTOMBOT_HOME}/phantombot/discord/custom:/opt/PhantomBot/scripts/discord/custom
+    #     - ${PHANTOMBOT_HOME}/phantombot/lang/custom:/opt/PhantomBot/scripts/lang/custom
+    #   environment:
+    #     - PHANTOMBOT_USER=${PHANTOMBOT_USER}
+    #     - PHANTOMBOT_OWNER=${PHANTOMBOT_OWNER}
+    #     - PHANTOMBOT_CHANNEL=${PHANTOMBOT_CHANNEL}
+    #     - PHANTOMBOT_PANELUSER=${PHANTOMBOT_PANELUSER}
+    #     - PHANTOMBOT_PANELPASSWORD=${PHANTOMBOT_PANELPASSWORD}
+    #     - PHANTOMBOT_OAUTH=${PHANTOMBOT_OAUTH}
+    #     - PHANTOMBOT_APIOAUTH=${PHANTOMBOT_APIOAUTH}
+    #     - PHANTOMBOT_YTAUTH=${PHANTOMBOT_YTAUTH}
+    #     - PHANTOMBOT_YTAUTHRO=${PHANTOMBOT_YTAUTHRO}
+    #     - PHANTOMBOT_WEBAUTH=${PHANTOMBOT_WEBAUTH}
+    #     - PHANTOMBOT_WEBAUTHRO=${PHANTOMBOT_WEBAUTHRO}
+    #     - PHANTOMBOT_DISCORD_TOKEN=${PHANTOMBOT_DISCORD_TOKEN}
+    #     - PHANTOMBOT_TWITCHALERTSKEY=${PHANTOMBOT_TWITCHALERTSKEY}
+    #     - PHANTOMBOT_TWITTERUSER=${PHANTOMBOT_TWITTERUSER}
+    #     - PHANTOMBOT_TWITTER_CONSUMER_KEY=${PHANTOMBOT_TWITTER_CONSUMER_KEY}
+    #     - PHANTOMBOT_TWITTER_CONSUMER_SECRET=${PHANTOMBOT_TWITTER_CONSUMER_SECRET}
+    #     - PHANTOMBOT_TWITTER_ACCESS_TOKEN=${PHANTOMBOT_TWITTER_ACCESS_TOKEN}
+    #     - PHANTOMBOT_TWITTER_SECRET_TOKEN=${PHANTOMBOT_TWITTER_SECRET_TOKEN}
+    #   labels:
+    #     - "traefik.enable=true"
+    #     - "traefik.http.middlewares.phantombot-redirect-redirectscheme.redirectscheme.scheme=https"
+    #     - "traefik.http.middlewares.phantombot-redirect-redirectscheme.redirectscheme.permanent=true"
+    #     - "traefik.http.routers.phantombot-http.rule=Host(`phantom.${COMMON_DOMAIN}`)"
+    #     - "traefik.http.routers.phantombot-http.middlewares=phantombot-redirect-redirectscheme"
+    #     - "traefik.http.routers.phantombot-http.entrypoints=http"
+    #     - "traefik.http.routers.phantombot-https.rule=Host(`phantom.${COMMON_DOMAIN}`)"
+    #     - "traefik.http.routers.phantombot-https.entrypoints=https"
+    #     - "traefik.http.routers.phantombot-https.service=phantombot-https"
+    #     - "traefik.http.routers.phantombot-https.tls=true"
+    #     - "traefik.http.services.phantombot-https.loadbalancer.server.port=25000"
+    #     - "traefik.http.middlewares.authHeader.headers.customrequestheaders.Authorization=Basic ${PBCUSTOM_AUTH_HEADER}"
+    #     - "traefik.http.middlewares.oauth.forwardauth.address=http://oauth:4181"
+    #     - "traefik.http.middlewares.oauth.forwardauth.trustForwardHeader=true"
+    #     - "traefik.http.middlewares.oauth.forwardauth.authResponseHeaders=X-Forwarded-User"
+    #     - "traefik.http.routers.phantombot-https.middlewares=oauth,authHeader"
     polr:
       image: ajanvier/polr
       container_name: polr
